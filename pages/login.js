@@ -14,20 +14,31 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    // Aquí irá la lógica para llamar a tu API de login
-    console.log('Login attempt with:', { username, password });
-
-    // Simulación de una llamada a la API
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        if (data.rol === 'Empleado') {
+          window.location.href = '/registrar';
+        } else {
+          window.location.href = '/dashboard'; // O la ruta que corresponda a otros roles
+        }
+      } else {
+        setError(data.error || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
+    } finally {
       setLoading(false);
-      // Aquí manejarías la respuesta. Si hay error:
-      // setError('Usuario o contraseña incorrectos.');
-      // Si es exitoso, redirigirías al usuario.
-    }, 2000);
+    }
   };
 
   return (
-    <div className="animated-bg p-4">
+    <div className="p-4"> {/* Quita animated-bg */}
       <div className="form-container">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Logo" className="w-32 mx-auto mb-4" />
@@ -73,9 +84,9 @@ export default function LoginPage() {
 
           <button type="submit" disabled={loading} className="w-full custom-button">
             {loading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              <div className="rounded-full h-5 w-5 border-b-2 border-white">{/* Quita animate-spin */}</div>
             ) : (
-              <><LogIn className="h-5 w-5"/> Ingresar</>
+              <><LogIn className="h-5 w-5" /> Ingresar</>
             )}
           </button>
         </form>

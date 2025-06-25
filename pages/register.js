@@ -8,7 +8,7 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    rol: 'empleado',
+    rol: 'Empleado', // <-- aquí debe ir la mayúscula
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -106,13 +106,13 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="rol" className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
             <select id="rol" name="rol" value={formData.rol} onChange={handleChange} className="w-full custom-input">
-              <option value="empleado">Empleado</option>
+              <option value="Empleado">Empleado</option>
               <option value="administrador">Administrador</option>
             </select>
           </div>
           
           <button type="submit" disabled={loading} className="w-full custom-button">
-            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <><UserPlus className="h-5 w-5"/> Registrarme</>}
+            {loading ? <div className="rounded-full h-5 w-5 border-b-2 border-white"></div> : <><UserPlus className="h-5 w-5"/> Registrarme</>}
           </button>
         </form>
         <p className="mt-8 text-center text-sm text-gray-600">
