@@ -22,10 +22,17 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (response.ok) {
-        if (data.rol === 'Empleado') {
+        // Guardamos el token y el rol en localStorage para usarlo en otras partes de la app
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', data.rol);
+
+        if (data.rol === 'Administrador') {
+          window.location.href = '/historial';
+        } else if (data.rol === 'Empleado') {
           window.location.href = '/registrar';
         } else {
-          window.location.href = '/dashboard'; // O la ruta que corresponda a otros roles
+          // Opcional: manejar otros roles o un rol por defecto
+          setError('Rol no reconocido.');
         }
       } else {
         setError(data.error || 'Error al iniciar sesión');

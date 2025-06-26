@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 
@@ -8,13 +8,36 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    rol: 'Empleado', // <-- aquí debe ir la mayúscula
+    rol: '', // Lo dejamos vacío inicialmente
   });
+  const [roles, setRoles] = useState([]); // Nuevo estado para los roles
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Efecto para cargar los roles cuando el componente se monta
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/roles/`);
+        if (!response.ok) {
+          throw new Error('No se pudieron cargar los roles.');
+        }
+        const data = await response.json();
+        setRoles(data);
+        if (data.length > 0) {
+          // Opcional: seleccionar el primer rol por defecto
+          setFormData(prev => ({ ...prev, rol: data[0].id }));
+        }
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,12 +129,16 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="rol" className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
             <select id="rol" name="rol" value={formData.rol} onChange={handleChange} className="w-full custom-input">
-              <option value="Empleado">Empleado</option>
-              <option value="administrador">Administrador</option>
+              <option value="" disabled>Selecciona un rol</option>
+              {roles.map(rol => (
+                <option key={rol.id} value={rol.id}>
+                  {rol.nombre}
+                </option>
+              ))}
             </select>
           </div>
           
-          <button type="submit" disabled={loading} className="w-full custom-button">
+          <button type="submit" disabled={loading || !formData.rol} className="w-full custom-button">
             {loading ? <div className="rounded-full h-5 w-5 border-b-2 border-white"></div> : <><UserPlus className="h-5 w-5"/> Registrarme</>}
           </button>
         </form>
