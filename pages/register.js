@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Mail, Lock, Briefcase } from 'lucide-react';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -8,34 +8,31 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    rol: '', // Lo dejamos vacío inicialmente
+    rol: '',
   });
-  const [roles, setRoles] = useState([]); // Nuevo estado para los roles
+  const [roles, setRoles] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Efecto para cargar los roles cuando el componente se monta
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/roles/`);
         if (!response.ok) {
-          throw new Error('No se pudieron cargar los roles.');
+          throw new Error('No se pudieron cargar los roles. Asegúrate de que el servidor backend esté funcionando.');
         }
         const data = await response.json();
         setRoles(data);
         if (data.length > 0) {
-          // Opcional: seleccionar el primer rol por defecto
           setFormData(prev => ({ ...prev, rol: data[0].id }));
         }
-      } catch (error) {
-        setError(error.message);
+      } catch (err) {
+        setError(err.message);
       }
     };
-
     fetchRoles();
   }, []);
 
@@ -48,6 +45,7 @@ export default function RegisterPage() {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden.');
+      setSuccess('');
       return;
     }
     setLoading(true);
@@ -55,12 +53,9 @@ export default function RegisterPage() {
     setSuccess('');
 
     try {
-      // Asegúrate de que la URL de la API en tu archivo .env.local sea la correcta
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/register/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
@@ -72,82 +67,80 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Intenta extraer un mensaje de error específico de la respuesta del backend
         const errorMessage = Object.values(data).flat().join(' ');
         throw new Error(errorMessage || 'Ocurrió un error durante el registro.');
       }
 
       setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
-      // Opcional: Redirigir al login o limpiar el formulario
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        rol: 'empleado',
-      });
+      setFormData({ username: '', email: '', password: '', confirmPassword: '', rol: roles.length > 0 ? roles[0].id : '' });
 
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="animated-bg p-4">
-      <div className="form-container">
-        <div className="text-center mb-8">
-          <img src="/logo.png" alt="Logo" className="w-32 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-800">Crea tu Cuenta</h1>
-          <p className="text-gray-600 mt-2">Es rápido y fácil</p>
+    <div className="auth-container">
+      <div className="form-wrapper">
+        <div className="form-header">
+          <div className="logo-container">
+            <img src="/logo.png" alt="Logo" />
+          </div>
+          <h1 className="form-title">Crea tu Cuenta</h1>
+          <p className="form-subtitle">Es rápido y fácil</p>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Repite la estructura de los inputs como en el login, usando `custom-input` */}
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-            <input id="username" name="username" type="text" value={formData.username} required onChange={handleChange} className="w-full custom-input" placeholder="Elige un nombre de usuario" />
+
+        <form onSubmit={handleSubmit}>
+          {error && <p className="form-message error">{error}</p>}
+          {success && <p className="form-message success">{success}</p>}
+
+          <div className="input-group">
+            <input id="username" name="username" type="text" value={formData.username} required onChange={handleChange} className="auth-input" placeholder="Nombre de usuario" />
+            <UserPlus className="input-icon" size={20} />
           </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-            <input id="email" name="email" type="email" value={formData.email} required onChange={handleChange} className="w-full custom-input" placeholder="tu@correo.com" />
+
+          <div className="input-group">
+            <input id="email" name="email" type="email" value={formData.email} required onChange={handleChange} className="auth-input" placeholder="Correo electrónico" />
+            <Mail className="input-icon" size={20} />
           </div>
-          <div className="relative">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input id="password" name="password" type={showPassword ? 'text' : 'password'} value={formData.password} required onChange={handleChange} className="w-full custom-input" placeholder="Crea una contraseña" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-              {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
-            </button>
+
+          <div className="input-group">
+            <input id="password" name="password" type={showPassword ? 'text' : 'password'} value={formData.password} required onChange={handleChange} className="auth-input" placeholder="Contraseña" />
+            <Lock className="input-icon" size={20} />
+            <div onClick={() => setShowPassword(!showPassword)} className="password-toggle">
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </div>
           </div>
-          <div className="relative">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
-            <input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} required onChange={handleChange} className="w-full custom-input" placeholder="Confirma tu contraseña" />
-            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-              {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
-            </button>
+
+          <div className="input-group">
+            <input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} required onChange={handleChange} className="auth-input" placeholder="Confirmar contraseña" />
+            <Lock className="input-icon" size={20} />
+            <div onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="password-toggle">
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </div>
           </div>
-          <div>
-            <label htmlFor="rol" className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-            <select id="rol" name="rol" value={formData.rol} onChange={handleChange} className="w-full custom-input">
+
+          <div className="input-group">
+            <select id="rol" name="rol" value={formData.rol} onChange={handleChange} required className="auth-input select-input">
               <option value="" disabled>Selecciona un rol</option>
               {roles.map(rol => (
-                <option key={rol.id} value={rol.id}>
-                  {rol.nombre}
-                </option>
+                <option key={rol.id} value={rol.id}>{rol.nombre}</option>
               ))}
             </select>
+            <Briefcase className="input-icon" size={20} />
           </div>
-          
-          <button type="submit" disabled={loading || !formData.rol} className="w-full custom-button">
-            {loading ? <div className="rounded-full h-5 w-5 border-b-2 border-white"></div> : <><UserPlus className="h-5 w-5"/> Registrarme</>}
+
+          <button type="submit" disabled={loading || !formData.rol} className="auth-button">
+            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <UserPlus size={20} />}
+            {!loading && <span>Registrarme</span>}
           </button>
         </form>
-        <p className="mt-8 text-center text-sm text-gray-600">
-          ¿Ya tienes una cuenta?{' '}
-          <Link href="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Inicia sesión
-          </Link>
-        </p>
+
+        <Link href="/login" className="auth-link">
+          ¿Ya tienes una cuenta? Inicia sesión
+        </Link>
       </div>
     </div>
   );

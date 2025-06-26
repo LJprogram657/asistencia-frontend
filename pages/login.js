@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -22,7 +22,6 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (response.ok) {
-        // Guardamos el token y el rol en localStorage para usarlo en otras partes de la app
         localStorage.setItem('token', data.token);
         localStorage.setItem('userRole', data.rol);
 
@@ -31,7 +30,6 @@ export default function LoginPage() {
         } else if (data.rol === 'Empleado') {
           window.location.href = '/registrar';
         } else {
-          // Opcional: manejar otros roles o un rol por defecto
           setError('Rol no reconocido.');
         }
       } else {
@@ -45,64 +43,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="p-4"> {/* Quita animated-bg */}
-      <div className="form-container">
-        <div className="text-center mb-8">
-          <img src="/logo.png" alt="Logo" className="w-32 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-800">Bienvenido</h1>
-          <p className="text-gray-600 mt-2">Inicia sesión para continuar</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-            <input
-              id="username"
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full custom-input"
-              placeholder="Tu nombre de usuario"
-            />
+    <div className="auth-container">
+      <div className="form-wrapper">
+        <div className="form-header">
+          <div className="logo-container">
+            <img src="/logo.png" alt="Logo" />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full custom-input pr-10"
-                placeholder="Tu contraseña"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-indigo-600"
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
+          <h1 className="form-title">Bienvenido</h1>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {error && <p className="form-message error">{error}</p>}
+
+          <div className="input-group">
+            <input id="username" type="text" required value={username} onChange={(e) => setUsername(e.target.value)} className="auth-input" placeholder="Usuario" />
+            <Mail className="input-icon" size={20} />
+          </div>
+
+          <div className="input-group">
+            <input id="password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="auth-input" placeholder="Contraseña" />
+            <Lock className="input-icon" size={20} />
+            <div onClick={() => setShowPassword(!showPassword)} className="password-toggle">
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-
-          <button type="submit" disabled={loading} className="w-full custom-button">
-            {loading ? (
-              <div className="rounded-full h-5 w-5 border-b-2 border-white">{/* Quita animate-spin */}</div>
-            ) : (
-              <><LogIn className="h-5 w-5" /> Ingresar</>
-            )}
+          <button type="submit" disabled={loading} className="auth-button">
+            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <LogIn size={20} />}
+            {!loading && <span>Ingresar</span>}
           </button>
         </form>
-        <p className="mt-8 text-center text-sm text-gray-600">
-          ¿No tienes una cuenta?{' '}
-          <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Regístrate
-          </Link>
-        </p>
+
+        <Link href="/register" className="auth-link">
+          ¿No tienes una cuenta? Regístrate
+        </Link>
       </div>
     </div>
   );
