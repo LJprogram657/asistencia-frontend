@@ -28,14 +28,10 @@ export default function RegistrarAsistencia() {
         formData.append('latitud', latitude);
         formData.append('longitud', longitude);
 
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/asistencia/registrar/`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/historial/`, {
           method: 'POST',
           body: formData,
-          // Asumiendo que necesitas enviar cookies de sesión para la autenticación
-          credentials: 'include', 
-          // No necesitas 'Content-Type' cuando usas FormData, el navegador lo establece.
-          // Django espera un CSRF token, pero para una API RESTful a menudo se desactiva
-          // o se maneja de otra forma. Por ahora, lo omitimos.
+          credentials: 'include',
         })
         .then(response => {
             if (!response.ok) {

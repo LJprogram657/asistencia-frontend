@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { setToken } from '../auth';
+import { useRouter } from 'next/router';
 
-export default function LoginPage() {
+function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,23 +18,22 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/login/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/login/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
       if (response.ok) {
-        // Guardamos el token y el rol en localStorage para usarlo en otras partes de la app
         localStorage.setItem('token', data.token);
         localStorage.setItem('userRole', data.rol);
-
         if (data.rol === 'Administrador') {
           window.location.href = '/historial';
         } else if (data.rol === 'Empleado') {
           window.location.href = '/registrar';
         } else {
-          // Opcional: manejar otros roles o un rol por defecto
           setError('Rol no reconocido.');
         }
       } else {
@@ -45,7 +47,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="p-4"> {/* Quita animated-bg */}
+    <div className="animated-bg p-4">
       <div className="form-container">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Logo" className="w-32 mx-auto mb-4" />
@@ -86,12 +88,10 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
-
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-
           <button type="submit" disabled={loading} className="w-full custom-button">
             {loading ? (
-              <div className="rounded-full h-5 w-5 border-b-2 border-white">{/* Quita animate-spin */}</div>
+              <div className="rounded-full h-5 w-5 border-b-2 border-white"></div>
             ) : (
               <><LogIn className="h-5 w-5" /> Ingresar</>
             )}
@@ -107,3 +107,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default LoginPage;

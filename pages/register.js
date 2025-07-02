@@ -21,7 +21,7 @@ export default function RegisterPage() {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/roles/`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/roles/`);
         if (!response.ok) {
           throw new Error('No se pudieron cargar los roles.');
         }
@@ -56,7 +56,7 @@ export default function RegisterPage() {
 
     try {
       // Asegúrate de que la URL de la API en tu archivo .env.local sea la correcta
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/register/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

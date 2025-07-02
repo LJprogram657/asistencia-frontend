@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Plus, Download, Loader, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { getToken, removeToken } from '../auth';
 
 // --- Componentes de UI reutilizables ---
 
@@ -77,7 +78,7 @@ const HistorialTabla = ({ asistencias }) => (
 
 // --- Componente Principal ---
 
-export default function HistorialAsistencias() {
+function HistorialAsistencias() {
   const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -87,15 +88,27 @@ export default function HistorialAsistencias() {
     const fetchAsistencias = async () => {
       setLoading(true);
       try {
+        const token = getToken();
+        if (!token) {
+          setError('No hay sesión activa. Por favor, inicia sesión.');
+          setLoading(false);
+          return;
+        }
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/asistencia/api/historial/`, {
-          credentials: 'include',
+          headers: {
+            'Authorization': `Token ${token}`
+          }
         });
+        if (response.status === 401) {
+          removeToken();
+          router.push('/login');
+          return;
+        }
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.detail || 'No se pudo obtener el historial de asistencias.');
         }
         const data = await response.json();
-        // Asumiendo que la API devuelve un array de objetos
         setAsistencias(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
@@ -105,7 +118,7 @@ export default function HistorialAsistencias() {
     };
 
     fetchAsistencias();
-  }, []);
+  }, [router]);
 
   const handleExportExcel = () => {
     const datosParaExportar = asistencias.map(a => ({
@@ -147,3 +160,5 @@ export default function HistorialAsistencias() {
     </div>
   );
 }
+
+export default HistorialAsistencias;
