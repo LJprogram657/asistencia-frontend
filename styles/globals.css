@@ -24,17 +24,14 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  background-color: #f0f4f8;
 }
 
 /* --- NUEVOS ESTILOS PARA LOGIN/REGISTER --- */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* --- ESTILOS GENERALES --- */
 body {
-  background-color: #f0f4f8; /* Un fondo base limpio */
+  background-color: #f0f4f8;
 }
 
 /* --- CONTENEDOR PRINCIPAL DE AUTENTICACIÓN --- */
@@ -46,11 +43,10 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  overflow: hidden; /* Evita que las formas se salgan */
-  background-color: #e0e7ff; /* Un color de fondo suave */
+  overflow: hidden;
+  background-color: #e0e7ff;
 }
 
-/* Fondo animado */
 .auth-container::before {
   content: '';
   position: absolute;
@@ -67,7 +63,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* --- FORMULARIO FLOTANTE (Glassmorphism) --- */
 .form-wrapper {
   position: relative;
   z-index: 10;
@@ -80,11 +75,10 @@ body {
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   width: 100%;
   max-width: 420px;
-  color: #1f2937; /* Texto oscuro para contraste */
-  box-sizing: border-box; /* Add this line to ensure padding is included in the width */
+  color: #1f2937;
+  box-sizing: border-box;
 }
 
-/* --- CABECERA DEL FORMULARIO --- */
 .form-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -105,9 +99,9 @@ body {
 
 .logo-container img {
   width: 100%;
-  height: 100%; /* Add height to ensure it fills the container */
-  object-fit: cover; /* Ensure the image covers the area without distortion */
-  border-radius: 50%; /* Apply border-radius to the image itself */
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .form-title {
@@ -121,7 +115,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* --- GRUPO DE INPUTS --- */
 .input-group {
   position: relative;
   margin-bottom: 1.5rem;
@@ -129,14 +122,14 @@ body {
 
 .auth-input {
   width: 100%;
-  padding: 1rem 1rem 1rem 3rem; /* Espacio para el ícono */
+  padding: 1rem 1rem 1rem 3rem;
   background: rgba(243, 244, 246, 0.9);
   border: 1px solid transparent;
   border-radius: 0.75rem;
   color: #1f2937;
   font-size: 1rem;
   transition: all 0.3s ease;
-  box-sizing: border-box; /* Add this line to ensure padding is included in the width */
+  box-sizing: border-box;
 }
 
 .auth-input:focus {
@@ -159,7 +152,6 @@ body {
   color: #4f46e5;
 }
 
-/* Select de Rol */
 .auth-input.select-input {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -171,7 +163,6 @@ body {
   padding-right: 2.5rem;
 }
 
-/* Toggle de Contraseña */
 .password-toggle {
   position: absolute;
   right: 1rem;
@@ -181,7 +172,6 @@ body {
   color: #6b7280;
 }
 
-/* --- BOTÓN PRINCIPAL --- */
 .auth-button {
   width: 100%;
   padding: 1rem;
@@ -210,22 +200,20 @@ body {
   cursor: not-allowed;
 }
 
-/* --- ENLACE SECUNDARIO --- */
 .auth-link {
   display: block;
   margin-top: 1.5rem;
   text-align: center;
-  color: #4b5563; /* Cambiado a un color más oscuro para mejor contraste */
+  color: #4b5563;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .auth-link:hover {
-  color: #1f2937; /* Color más oscuro para el hover */
+  color: #1f2937;
   text-decoration: underline;
 }
 
-/* --- MENSAJES DE ERROR/ÉXITO --- */
 .form-message {
   text-align: center;
   margin-bottom: 1rem;
