@@ -180,6 +180,14 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+  .boton-accion {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s;
+  }
   display: flex;
   align-items: center;
   justify-content: center;
