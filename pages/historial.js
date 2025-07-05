@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Plus, Download, Loader, AlertCircle } from 'lucide-react';
+import { Search, Plus, Download, Loader, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { getToken, removeToken } from '../auth';
 
@@ -82,6 +82,7 @@ function HistorialAsistencias() {
   const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -118,6 +119,7 @@ function HistorialAsistencias() {
     };
 
     fetchAsistencias();
+    setUserRole(typeof window !== 'undefined' ? localStorage.getItem('userRole') : '');
   }, [router]);
 
   const handleExportExcel = () => {
@@ -136,27 +138,55 @@ function HistorialAsistencias() {
     XLSX.writeFile(workbook, 'HistorialAsistencias.xlsx');
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
-      <header className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-2xl sm:text-4xl font-bold text-gray-800">Historial de Asistencias</h1>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <BotonAccion onClick={() => router.push('/registrar')} color="bg-blue-500 text-white hover:bg-blue-600">
-            <Plus className="h-5 w-5 mr-2" />
-            Registrar
-          </BotonAccion>
-          <BotonAccion onClick={handleExportExcel} color="bg-green-500 text-white hover:bg-green-600" disabled={asistencias.length === 0}>
-            <Download className="h-5 w-5 mr-2" />
-            Excel
-          </BotonAccion>
-        </div>
-      </header>
+  const handleVolver = () => {
+    window.history.back();
+  };
 
-      <main>
-        {loading && <EstadoCarga />}
-        {error && <MensajeError mensaje={error} />}
-        {!loading && !error && <HistorialTabla asistencias={asistencias} />}
-      </main>
+  const handleRegistrar = () => {
+    window.location.href = '/registrar';
+  };
+
+  return (
+    <div className="historial-bg">
+      <div className="historial-card">
+        <div className="historial-header">
+          <img src="/logo.png" alt="Logo" className="logo-empresa" />
+          <h1 className="titulo-historial">Historial de Asistencias</h1>
+          <button className="volver-btn" onClick={handleVolver}>Volver</button>
+        </div>
+        <div className="button-row">
+          <button className="filter-btn">
+            <Search className="icon-btn" /> Filtrar
+          </button>
+          {userRole !== 'admin' && (
+            <button className="registrar-btn" onClick={handleRegistrar}>
+              <Plus className="icon-btn" /> Registrar
+            </button>
+          )}
+          <button className="excel-btn" onClick={handleExportExcel}>
+            <Download className="icon-btn" /> Exportar a Excel
+          </button>
+        </div>
+        <div className="table-container">
+          <table className="asistencia-table">
+            <EncabezadoTabla />
+            <tbody>
+              {asistencias.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', color: '#888' }}>
+                    No se encontraron registros de asistencia.
+                  </td>
+                </tr>
+              ) : (
+                asistencias.map((asistencia) => (
+                  <FilaHistorial key={asistencia.id} asistencia={asistencia} />
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="animated-bg"></div>
     </div>
   );
 }

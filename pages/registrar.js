@@ -64,33 +64,35 @@ export default function RegistrarAsistencia() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-4xl mx-auto">
-        <header className="mb-8 flex justify-between items-center">
-            <h1 className="text-4xl font-bold text-gray-800">Registrar Asistencia</h1>
-            <button onClick={() => router.push('/')} className="flex items-center bg-gray-500 text-white hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition-colors duration-300">
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Volver al Historial
-            </button>
+    <div className="registrar-bg">
+      <div className="registrar-card">
+        <header className="registrar-header">
+          <div className="logo-titulo">
+            <img src="/logo.png" alt="Logo Empresa" className="logo-empresa" />
+            <h1 className="titulo-registrar">Registrar Asistencia</h1>
+          </div>
+          <button onClick={() => window.history.back()} className="volver-btn">
+            <ArrowLeft className="icon-btn" /> Volver
+          </button>
         </header>
-
-        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
-        {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">{success}</div>}
-
-        <main className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {error && <div className="alerta-error">{error}</div>}
+        {success && <div className="alerta-exito">{success}</div>}
+        <main className="opciones-grid">
           {opciones.map(({ tipo, texto, Icon, color }) => (
-            <button 
-              key={tipo} 
+            <button
+              key={tipo}
               onClick={() => handleRegistrar(tipo)}
               disabled={loading}
-              className={`p-8 rounded-xl shadow-lg text-white font-bold text-2xl flex flex-col items-center justify-center transition-transform transform hover:scale-105 ${color} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-              <Icon className="h-16 w-16 mb-4" />
+              className={`opcion-btn registrar-btn ${loading ? 'btn-disabled' : ''}`}
+            >
+              <Icon className="icon-btn-opcion" />
               <span>{texto}</span>
-              {loading === tipo && <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mt-4"></div>}
+              {loading === tipo && <div className="loader-btn"></div>}
             </button>
           ))}
         </main>
       </div>
+      <div className="animated-bg"></div>
     </div>
   );
 }

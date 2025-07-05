@@ -15,7 +15,8 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [shake, setShake] = useState(false);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -45,12 +46,15 @@ export default function RegisterPage() {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden.');
-      setSuccess('');
+      setSuccess(false);
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
       return;
     }
     setLoading(true);
     setError('');
-    setSuccess('');
+    setSuccess(false);
+    setShake(false);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/register/`, {
         method: 'POST',
@@ -65,12 +69,18 @@ export default function RegisterPage() {
       const data = await response.json();
       if (!response.ok) {
         const errorMessage = Object.values(data).flat().join(' ');
-        throw new Error(errorMessage || 'Ocurrió un error durante el registro.');
+        setError(errorMessage || 'Ocurrió un error durante el registro.');
+        setShake(true);
+        setTimeout(() => setShake(false), 600);
+        return;
       }
-      setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
+      setSuccess(true);
       setFormData({ username: '', email: '', password: '', confirmPassword: '', rol: roles.length > 0 ? roles[0].id : '' });
+      setTimeout(() => setSuccess(false), 2000);
     } catch (err) {
       setError(err.message);
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
     } finally {
       setLoading(false);
     }
@@ -78,17 +88,24 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-container">
+      <div className="animated-bg"></div>
       <div className="form-wrapper">
         <div className="form-header">
           <div className="logo-container">
             <img src="/logo.png" alt="Logo" />
           </div>
           <h1 className="form-title">Crea tu Cuenta</h1>
-          <p className="form-subtitle">Es rápido y fácil</p>
         </div>
         <form onSubmit={handleSubmit}>
           {error && <p className="form-message error">{error}</p>}
-          {success && <p className="form-message success">{success}</p>}
+          {success && (
+            <p className="form-message success">
+              <span className="checkmark">
+                <svg viewBox="0 0 52 52"><circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/><path className="checkmark-check" fill="none" d="M14 27l7 7 16-16"/></svg>
+              </span>
+              ¡Registro exitoso! Ahora puedes iniciar sesión.
+            </p>
+          )}
           <div className="input-group">
             <input id="username" name="username" type="text" value={formData.username} required onChange={handleChange} className="auth-input" placeholder="Nombre de usuario" />
             <UserPlus className="input-icon" size={20} />
@@ -120,9 +137,14 @@ export default function RegisterPage() {
             </select>
             <Briefcase className="input-icon" size={20} />
           </div>
-          <button type="submit" disabled={loading || !formData.rol} className="auth-button">
-            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <UserPlus size={20} />}
-            {!loading && <span>Registrarme</span>}
+          <button type="submit" disabled={loading || !formData.rol} className={`auth-button${shake ? ' shake' : ''}${success ? ' success' : ''}`}> 
+            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : success ? (
+              <span className="checkmark">
+                <svg viewBox="0 0 52 52"><circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/><path className="checkmark-check" fill="none" d="M14 27l7 7 16-16"/></svg>
+              </span>
+            ) : <UserPlus size={20} />}
+            {!loading && !success && <span>Registrarme</span>}
+            {success && <span>¡Listo!</span>}
           </button>
         </form>
         <Link href="/login" className="auth-link">
