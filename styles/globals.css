@@ -670,6 +670,42 @@ table th:last-child, table td:last-child {
 /* Remove duplicate closing brace as it was causing a syntax error */
 
 /* --- CONTENEDOR PRINCIPAL DE AUTENTICACIÓN --- */
+.input-filtro {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #bfc9d9;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.input-filtro:focus {
+  border: 1.5px solid #1488cc;
+}
+
+.filtro-panel-integrado {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  background: #f7fafd;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 1.5rem;
+}
+.input-filtro-integrado {
+  border: 1px solid #c3d0e8;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background: #fff;
+  transition: border 0.2s;
+  outline: none;
+}
+.input-filtro-integrado:focus {
+  border: 1.5px solid #4a90e2;
+  background: #f0f7ff;
+}
+
 .auth-container {
   position: relative;
   min-height: 100vh;

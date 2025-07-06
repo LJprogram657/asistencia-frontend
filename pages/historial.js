@@ -80,10 +80,15 @@ const HistorialTabla = ({ asistencias }) => (
 
 function HistorialAsistencias() {
   const [asistencias, setAsistencias] = useState([]);
+  const [nombresUnicos, setNombresUnicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userRole, setUserRole] = useState('');
   const router = useRouter();
+  const [showFilter, setShowFilter] = useState(false);
+  const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroFechaInicio, setFiltroFechaInicio] = useState('');
+  const [filtroFechaFin, setFiltroFechaFin] = useState('');
 
   useEffect(() => {
     const fetchAsistencias = async () => {
@@ -111,13 +116,15 @@ function HistorialAsistencias() {
         }
         const data = await response.json();
         setAsistencias(Array.isArray(data) ? data : []);
+        // Extraer nombres únicos correctamente
+        const nombres = Array.isArray(data) ? Array.from(new Set(data.map(a => a.usuario_nombre).filter(Boolean))) : [];
+        setNombresUnicos(nombres);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchAsistencias();
     setUserRole(typeof window !== 'undefined' ? localStorage.getItem('userRole') : '');
   }, [router]);
@@ -146,6 +153,16 @@ function HistorialAsistencias() {
     window.location.href = '/registrar';
   };
 
+  // Filtrado local de asistencias
+  const asistenciasFiltradas = asistencias.filter(a => {
+    const nombreMatch = filtroNombre === '' || a.usuario_nombre === filtroNombre;
+    const fecha = new Date(a.fecha);
+    const inicio = filtroFechaInicio ? new Date(filtroFechaInicio) : null;
+    const fin = filtroFechaFin ? new Date(filtroFechaFin) : null;
+    const fechaMatch = (!inicio || fecha >= inicio) && (!fin || fecha <= fin);
+    return nombreMatch && fechaMatch;
+  });
+
   return (
     <div className="historial-bg">
       <div className="historial-card">
@@ -155,7 +172,7 @@ function HistorialAsistencias() {
           <button className="volver-btn" onClick={handleVolver}>Volver</button>
         </div>
         <div className="button-row">
-          <button className="filter-btn">
+          <button className="filter-btn" onClick={() => setShowFilter(v => !v)}>
             <Search className="icon-btn" /> Filtrar
           </button>
           {userRole !== 'admin' && (
@@ -167,18 +184,38 @@ function HistorialAsistencias() {
             <Download className="icon-btn" /> Exportar a Excel
           </button>
         </div>
+        {showFilter && (
+          <div className="filtro-panel-integrado">
+            <select
+              value={filtroNombre}
+              onChange={e => setFiltroNombre(e.target.value)}
+              className="input-filtro-integrado"
+            >
+              <option value="">Todos los usuarios</option>
+              {nombresUnicos.map(nombre => (
+                <option key={nombre} value={nombre}>{nombre}</option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={filtroFechaInicio}
+              onChange={e => setFiltroFechaInicio(e.target.value)}
+              className="input-filtro-integrado"
+            />
+          </div>
+        )}
         <div className="table-container">
           <table className="asistencia-table">
             <EncabezadoTabla />
             <tbody>
-              {asistencias.length === 0 ? (
+              {asistenciasFiltradas.length === 0 ? (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', color: '#888' }}>
                     No se encontraron registros de asistencia.
                   </td>
                 </tr>
               ) : (
-                asistencias.map((asistencia) => (
+                asistenciasFiltradas.map((asistencia) => (
                   <FilaHistorial key={asistencia.id} asistencia={asistencia} />
                 ))
               )}
