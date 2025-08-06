@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
-import { setToken } from '../auth';
+import { setTokens, fetchUserInfo, redirectBasedOnRole } from '../auth';
 import { useRouter } from 'next/router';
 
 function LoginPage() {
@@ -22,31 +22,42 @@ function LoginPage() {
     setError('');
     setShake(false);
     setSuccess(false);
+    
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/usuarios/login/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
       });
+      
       const data = await response.json();
+      
       if (response.ok) {
         setSuccess(true);
-        setTimeout(() => {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('userRole', data.rol);
-          if (data.rol === 'Administrador') {
-            window.location.href = '/historial';
-          } else if (data.rol === 'Empleado') {
-            window.location.href = '/registrar';
-          } else {
-            setError('Rol no reconocido.');
+        
+        // Guardar tokens
+        setTokens(data.access, data.refresh);
+        
+        // Obtener información del usuario y redirigir según el rol
+        setTimeout(async () => {
+          try {
+            const userInfo = await fetchUserInfo();
+            if (userInfo && userInfo.rol) {
+              redirectBasedOnRole(router, userInfo.rol);
+            } else {
+              // Si no se puede obtener el rol, redirigir a registrar por defecto
+              router.push('/registrar');
+            }
+          } catch (error) {
+            console.error('Error fetching user info:', error);
+            router.push('/registrar');
           }
-        }, 900); // Espera para mostrar el check animado
+        }, 900);
       } else {
         setShake(true);
-        setError(data.error || 'Error al iniciar sesión');
+        setError(data.detail || 'Error al iniciar sesión');
       }
     } catch (err) {
       setShake(true);
@@ -70,11 +81,27 @@ function LoginPage() {
         <form onSubmit={handleSubmit}>
           {error && <p className="form-message error">{error}</p>}
           <div className="input-group">
-            <input id="username" type="text" required value={username} onChange={(e) => setUsername(e.target.value)} className="auth-input" placeholder="Usuario" />
+            <input 
+              id="username" 
+              type="text" 
+              required 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              className="auth-input" 
+              placeholder="Usuario" 
+            />
             <Mail className="input-icon" size={20} />
           </div>
           <div className="input-group">
-            <input id="password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="auth-input" placeholder="Contraseña" />
+            <input 
+              id="password" 
+              type={showPassword ? 'text' : 'password'} 
+              required 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              className="auth-input" 
+              placeholder="Contraseña" 
+            />
             <Lock className="input-icon" size={20} />
             <div onClick={() => setShowPassword(!showPassword)} className="password-toggle">
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -87,7 +114,10 @@ function LoginPage() {
           >
             {loading && <div className="spinner"></div>}
             {success && (
-              <svg className="checkmark" viewBox="0 0 52 52"><circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/><path className="checkmark-check" fill="none" d="M14 27l7 7 16-16"/></svg>
+              <svg className="checkmark" viewBox="0 0 52 52">
+                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                <path className="checkmark-check" fill="none" d="M14 27l7 7 16-16"/>
+              </svg>
             )}
             {!loading && !success && <LogIn size={20} />}
             {!loading && !success && <span>Ingresar</span>}
